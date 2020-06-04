@@ -2,7 +2,7 @@ package zhuojun.cruddemo.crud.crudAdmin.controller;
 
 import org.springframework.web.bind.annotation.*;
 import zhuojun.cruddemo.crud.common.annotation.AuthRequired;
-import zhuojun.cruddemo.crud.common.base.domain.Result;
+import zhuojun.cruddemo.crud.common.domain.Result;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.enums.RoleEnum;
 import zhuojun.cruddemo.crud.common.exception.AuthenticationException;

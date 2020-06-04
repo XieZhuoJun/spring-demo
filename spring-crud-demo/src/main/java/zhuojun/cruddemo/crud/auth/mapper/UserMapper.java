@@ -1,7 +1,7 @@
 package zhuojun.cruddemo.crud.auth.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import zhuojun.cruddemo.crud.system.domain.po.User;
+import zhuojun.cruddemo.crud.common.domain.User;
 
 /**
  * @author: zhuojun

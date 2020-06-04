@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import zhuojun.cruddemo.crud.common.base.domain.Result;
+import zhuojun.cruddemo.crud.common.domain.Result;
 import zhuojun.cruddemo.crud.common.exception.AuthenticationException;
 import zhuojun.cruddemo.crud.common.exception.RegisterException;
 

@@ -17,4 +17,7 @@ public class Constants {
      * 过期时间1小时
      */
     public static final Long EXPIRE_TIME = 1000 * 60 * 60L;
+
+    public static final String ROLE_CLAIM_KEY = "role";
+    public static final String PLATFORM_CLAIM_KEY = "platform";
 }

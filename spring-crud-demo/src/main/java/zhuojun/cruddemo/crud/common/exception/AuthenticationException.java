@@ -13,10 +13,15 @@ public class AuthenticationException extends BaseServerException {
     public AuthenticationException() {
     }
 
-    public AuthenticationException(MessageEnum messageEnum){
+    public AuthenticationException(MessageEnum messageEnum) {
         super(messageEnum.getMsg());
     }
+
     public AuthenticationException(String message, Object... args) {
         super(message, args);
+    }
+
+    public AuthenticationException(Throwable cause) {
+        super(cause);
     }
 }

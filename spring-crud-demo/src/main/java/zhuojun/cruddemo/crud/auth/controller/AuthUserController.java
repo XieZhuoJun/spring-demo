@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import zhuojun.cruddemo.crud.auth.domain.dto.LogForm;
 import zhuojun.cruddemo.crud.auth.service.AuthenticationService;
 import zhuojun.cruddemo.crud.common.annotation.AuthRequired;
-import zhuojun.cruddemo.crud.common.base.domain.Result;
+import zhuojun.cruddemo.crud.common.domain.Result;
 import zhuojun.cruddemo.crud.common.constant.Constants;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.enums.RoleEnum;

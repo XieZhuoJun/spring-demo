@@ -1,15 +1,19 @@
 package zhuojun.cruddemo.crud.auth.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import zhuojun.cruddemo.crud.auth.domain.dto.LogForm;
 import zhuojun.cruddemo.crud.common.constant.Constants;
+import zhuojun.cruddemo.crud.common.constant.PlatformConstants;
+import zhuojun.cruddemo.crud.common.domain.JwtParam;
 import zhuojun.cruddemo.crud.common.util.JwtUtil;
-import zhuojun.cruddemo.crud.system.domain.po.User;
+import zhuojun.cruddemo.crud.common.domain.User;
 import zhuojun.cruddemo.crud.auth.mapper.UserMapper;
-import zhuojun.cruddemo.crud.common.base.domain.Result;
+import zhuojun.cruddemo.crud.common.domain.Result;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.exception.AuthenticationException;
+import zhuojun.cruddemo.crud.common.util.RedisUtil;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -26,6 +30,9 @@ public class AuthenticationService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Autowired
+    private RedisUtil redisutil;
 
     /**
      * @param logForm 登录表单
@@ -60,27 +67,38 @@ public class AuthenticationService {
         }
 
         /*
-        Generate token
+        Generate token and add to redis
          */
-        Map<String, String> tokenMap = generateTokenMap(user.getId(), user.getPassword(), Constants.EXPIRE_TIME);
+        Map<String, String> tokenMap = generateTokenMap(user);
+        if(!addTokenToRedis(tokenMap.get(Constants.AUTH_HEADER_KEY), user.getId(),PlatformConstants.DESKTOP_BROWSER,user.getPassword())){
+            throw new AuthenticationException(MessageEnum.ERROR);
+        }
         return Result.successResult(MessageEnum.LOGIN_SUCCESS.getMsg(), tokenMap);
     }
 
-    /**
+    /**@TODO
      * @param token 旧的token
      * @return 包含新token的result
      */
     public Result refreshToken(String token) {
-
-        User user = userMapper.selectById(JwtUtil.getJwtUserId(token));
-        Map<String, String> tokenMap = generateTokenMap(user.getId(), user.getPassword(), Constants.EXPIRE_TIME);
-        return Result.successResult(MessageEnum.LOGIN_SUCCESS.getMsg(), tokenMap);
+        return new Result();
     }
 
-    private Map<String, String> generateTokenMap(Long userId, String password, Long expireTime) {
-        String token = JwtUtil.generateJwt(userId.toString(), password, expireTime);
+    private Map<String, String> generateTokenMap(User user) {
+        JwtParam jwtParam = new JwtParam();
+        jwtParam.setId(user.getId())
+                .setRoleId(user.getRoleId())
+                .setExpireTime(Constants.EXPIRE_TIME)
+                .setSecret(user.getPassword())
+                .setPlatform(PlatformConstants.DESKTOP_BROWSER);
+        String token = JwtUtil.generateJwt(jwtParam);
         Map<String, String> tokenMap = new HashMap<>(0);
         tokenMap.put(Constants.AUTH_HEADER_KEY, token);
         return tokenMap;
+    }
+
+    private Boolean addTokenToRedis(String token,Long userId, Integer platform, String secret){
+        String key = userId.toString() + "_" + platform.toString() + "_" + token;
+        return redisutil.set(key,secret,Constants.EXPIRE_TIME / 1000);
     }
 }

@@ -12,10 +12,15 @@ public class RegisterException extends BaseServerException {
     public RegisterException() {
     }
 
-    public RegisterException(MessageEnum messageEnum){
+    public RegisterException(MessageEnum messageEnum) {
         super(messageEnum.getMsg());
     }
+
     public RegisterException(String message, Object... args) {
         super(message, args);
+    }
+
+    public RegisterException(Throwable cause) {
+        super(cause);
     }
 }

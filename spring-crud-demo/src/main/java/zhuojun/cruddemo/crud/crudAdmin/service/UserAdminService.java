@@ -5,13 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import zhuojun.cruddemo.crud.auth.mapper.UserMapper;
-import zhuojun.cruddemo.crud.common.base.domain.Result;
+import zhuojun.cruddemo.crud.common.domain.Result;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.enums.RoleEnum;
 import zhuojun.cruddemo.crud.common.exception.AuthenticationException;
 import zhuojun.cruddemo.crud.common.exception.RegisterException;
 import zhuojun.cruddemo.crud.crudAdmin.domain.dto.RegisterForm;
-import zhuojun.cruddemo.crud.system.domain.po.User;
+import zhuojun.cruddemo.crud.common.domain.User;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;

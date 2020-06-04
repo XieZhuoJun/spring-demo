@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-import zhuojun.cruddemo.crud.system.domain.po.User;
+import zhuojun.cruddemo.crud.common.constant.PlatformConstants;
+import zhuojun.cruddemo.crud.common.domain.User;
 import zhuojun.cruddemo.crud.auth.mapper.AuthTokenMapper;
 import zhuojun.cruddemo.crud.auth.mapper.UserMapper;
 import zhuojun.cruddemo.crud.common.annotation.AuthRequired;
@@ -19,6 +20,7 @@ import zhuojun.cruddemo.crud.common.constant.Constants;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.enums.RoleEnum;
 import zhuojun.cruddemo.crud.common.exception.AuthenticationException;
+import zhuojun.cruddemo.crud.common.util.RedisUtil;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
@@ -40,11 +42,12 @@ import java.util.Map;
 @Configuration
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
-    @Resource
-    private AuthTokenMapper authTokenMapper;
+//    @Resource
+//    private UserMapper userMapper;
+//用户信息从redis和token中取得
 
     @Resource
-    private UserMapper userMapper;
+    private RedisUtil redisUtil;
 
     private User verifyJwtToken(String token) {
         if (StringUtils.isEmpty(token)) {
@@ -53,7 +56,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
         /*
          * 验证流程：
-         * Decode获取用户id - 检查Expire time - 从用户表中查到密码，作为密钥验证token - 在Redis白名单中查询
+         * decode获取用户id - 检查Expire time - 在Redis白名单中查询,获取token secret - 验证token
          */
 
         /*
@@ -76,32 +79,26 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
 
         /*
-         * 通过id，从数据库中获取用户对象
+         * 在Redis白名单中查找token
          */
-        User user = userMapper.selectById(jwt.getAudience().get(0));
-        if (user == null) {
+        String key = jwt.getAudience().get(0) + "_" + PlatformConstants.DESKTOP_BROWSER + "_" + token;
+        String secret = (String)redisUtil.get(key);
+        if (secret == null) {
             throw new AuthenticationException(MessageEnum.INVALID_TOKEN);
         }
 
         /*
          Token验证
          */
-        JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(user.getPassword())).build();
+        JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(secret)).build();
         try {
             jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
             throw new AuthenticationException(MessageEnum.INVALID_TOKEN);
         }
-
-        /*
-         * 在Redis白名单中查找token
-         */
-        Map<String, Object> selectMap = new HashMap<>(0);
-        selectMap.put("token", token);
-        if (authTokenMapper.selectByMap(selectMap) == null) {
-            throw new AuthenticationException(MessageEnum.INVALID_TOKEN);
-        }
-
+        User user = new User();
+        user.setId(Long.valueOf(jwt.getAudience().get(0)))
+                .setRoleId(jwt.getClaims().get(Constants.ROLE_CLAIM_KEY).asInt());
         return user;
     }
 

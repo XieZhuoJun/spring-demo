@@ -3,9 +3,11 @@ package zhuojun.cruddemo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import zhuojun.cruddemo.crud.auth.domain.po.AuthToken;
 import zhuojun.cruddemo.crud.auth.mapper.AuthTokenMapper;
+import zhuojun.cruddemo.crud.common.util.RedisUtil;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -23,6 +25,9 @@ public class MapperTest {
 
     @Resource
     private AuthTokenMapper authTokenMapper;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Test
     public void insert() {
