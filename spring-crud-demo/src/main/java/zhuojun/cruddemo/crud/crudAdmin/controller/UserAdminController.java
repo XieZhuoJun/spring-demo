@@ -11,6 +11,7 @@ import zhuojun.cruddemo.crud.crudAdmin.domain.dto.RegisterForm;
 import zhuojun.cruddemo.crud.crudAdmin.service.UserAdminService;
 
 import javax.annotation.Resource;
+import javax.websocket.server.PathParam;
 
 /**
  * @author: zhuojun
@@ -44,11 +45,20 @@ public class UserAdminController {
         return userAdminService.register(registrationForm);
     }
 
+    /**
+     * 返回用户列表，包含用户状态信息
+     * @return
+     */
     @AuthRequired(role = RoleEnum.ADMIN)
     @GetMapping("/list")
     public Result fetchUserList(){
         return userAdminService.getUserList();
     }
 
+    
+    @AuthRequired(role = RoleEnum.ADMIN)
+    @DeleteMapping("/token/{platformId}")
+    public Result deleteToken(@PathParam("platformId") Integer platformId){
 
+    }
 }
