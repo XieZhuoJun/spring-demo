@@ -6,18 +6,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import zhuojun.cruddemo.crud.auth.mapper.UserMapper;
 import zhuojun.cruddemo.crud.common.domain.Result;
+import zhuojun.cruddemo.crud.common.domain.UserWithTokenStatus;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.enums.RoleEnum;
 import zhuojun.cruddemo.crud.common.exception.AuthenticationException;
 import zhuojun.cruddemo.crud.common.exception.RegisterException;
+import zhuojun.cruddemo.crud.common.util.ClassUtil;
+import zhuojun.cruddemo.crud.common.util.RedisUtil;
 import zhuojun.cruddemo.crud.crudAdmin.domain.dto.RegisterForm;
 import zhuojun.cruddemo.crud.common.domain.User;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: zhuojun
@@ -30,6 +31,9 @@ import java.util.Map;
 public class UserAdminService {
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private RedisUtil redisUtil;
 
     public Result register(RegisterForm registerForm) {
         User newUser = new User();
@@ -64,10 +68,29 @@ public class UserAdminService {
         }
     }
 
+    private Set<Integer> findTokenInRedis(Long id) {
+        Set<Integer>platformSet = new HashSet<Integer>();
+        String pattern = id + "_*";
+        Set<String> tokenSet = redisUtil.keys(pattern);
+        if(tokenSet != null){
+            for(String token : tokenSet){
+                platformSet.add(Integer.valueOf(token.split("_")[1]));
+            }
+        }
+        return platformSet;
+    }
+
     public Result getUserList() {
         QueryWrapper<User> queryWrapper = new QueryWrapper<User>();
         List<User> userList = userMapper.selectList(queryWrapper);
-        return Result.successResult(userList);
-
+        List<UserWithTokenStatus> userTokenList = new ArrayList<UserWithTokenStatus>();
+        for(User user : userList){
+            UserWithTokenStatus userWithTokenStatus = new UserWithTokenStatus();
+            ClassUtil.covertFatherToChild(user,userWithTokenStatus);
+            userWithTokenStatus.setAvailableTokens(findTokenInRedis(user.getId()));
+            userWithTokenStatus.setPassword("");
+            userTokenList.add(userWithTokenStatus);
+        }
+        return Result.successResult(userTokenList);
     }
 }
