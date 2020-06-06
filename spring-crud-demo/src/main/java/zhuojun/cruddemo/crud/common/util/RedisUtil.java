@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -111,7 +112,6 @@ public class RedisUtil {
     }
 
     /**
-     *
      * @param key
      * @param value
      * @param time
@@ -128,6 +128,15 @@ public class RedisUtil {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Boolean.FALSE;
+        }
+    }
+
+    public Set<String> keys(String pattern) {
+        try {
+            return redisTemplate.keys(pattern);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 }
