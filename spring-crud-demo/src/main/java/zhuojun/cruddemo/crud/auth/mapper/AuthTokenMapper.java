@@ -1,7 +1,7 @@
 package zhuojun.cruddemo.crud.auth.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import zhuojun.cruddemo.crud.auth.domain.po.AuthToken;
+import zhuojun.cruddemo.crud.common.domain.TokenView;
 
 /**
  * @author: zhuojun
@@ -9,6 +9,6 @@ import zhuojun.cruddemo.crud.auth.domain.po.AuthToken;
  * @date: 2020/05/29 20:31
  * @modified:
  */
-public interface AuthTokenMapper extends BaseMapper<AuthToken> {
+public interface AuthTokenMapper extends BaseMapper<TokenView> {
 
 }
