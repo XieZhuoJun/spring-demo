@@ -55,10 +55,10 @@ public class UserAdminController {
         return userAdminService.getUserList();
     }
 
-    
-    @AuthRequired(role = RoleEnum.ADMIN)
-    @DeleteMapping("/token/{platformId}")
-    public Result deleteToken(@PathParam("platformId") Integer platformId){
 
+    @AuthRequired(role = RoleEnum.ADMIN)
+    @DeleteMapping("/token/{userId}/{platformId}")
+    public Result deleteToken(@PathVariable("userId") Long userId,@PathVariable("platformId") Integer platformId){
+        return userAdminService.deleteUserToken(userId, platformId);
     }
 }

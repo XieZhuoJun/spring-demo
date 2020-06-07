@@ -2,6 +2,7 @@ package zhuojun.cruddemo.crud.common.domain;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 import java.util.Set;
 
@@ -12,8 +13,9 @@ import java.util.Set;
  * @modified:
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 public class UserWithTokenStatus extends User{
-    private Set<Integer> availableTokens;
+    private Set<TokenView> availableTokens;
 
 }

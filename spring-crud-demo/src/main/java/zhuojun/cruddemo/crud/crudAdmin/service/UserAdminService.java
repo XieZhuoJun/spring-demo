@@ -1,11 +1,15 @@
 package zhuojun.cruddemo.crud.crudAdmin.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import zhuojun.cruddemo.crud.auth.mapper.UserMapper;
+import zhuojun.cruddemo.crud.common.constant.Constants;
 import zhuojun.cruddemo.crud.common.domain.Result;
+import zhuojun.cruddemo.crud.common.domain.TokenView;
 import zhuojun.cruddemo.crud.common.domain.UserWithTokenStatus;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.enums.RoleEnum;
@@ -18,6 +22,7 @@ import zhuojun.cruddemo.crud.common.domain.User;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -68,16 +73,27 @@ public class UserAdminService {
         }
     }
 
-    private Set<Integer> findTokenInRedis(Long id) {
-        Set<Integer>platformSet = new HashSet<Integer>();
-        String pattern = id + "_*";
-        Set<String> tokenSet = redisUtil.keys(pattern);
-        if(tokenSet != null){
-            for(String token : tokenSet){
-                platformSet.add(Integer.valueOf(token.split("_")[1]));
+    private Set<TokenView> getTokenViews(String pattern) {
+        Set<String> keySet = redisUtil.keys(pattern);
+        Set<TokenView> tokenViewSet = new HashSet<>();
+        if(keySet != null){
+            for(String key : keySet){
+                try{
+                    TokenView tokenView = new TokenView();
+                    String token = (String)redisUtil.get(key);
+                    DecodedJWT jwt = JWT.decode(token);
+                    tokenView.setUuid(jwt.getClaim(Constants.UUID_CLAIM_KEY).asString())
+                            .setRoleId(jwt.getClaim(Constants.ROLE_CLAIM_KEY).asInt())
+                            .setUserId(Long.valueOf(jwt.getAudience().get(0)))
+                            .setExpireTime(LocalDateTime.ofInstant(jwt.getExpiresAt().toInstant(), ZoneId.systemDefault()))
+                            .setPlatformId(jwt.getClaim(Constants.PLATFORM_CLAIM_KEY).asInt());
+                    tokenViewSet.add(tokenView);
+                } catch (Exception e) {
+                    log.info(e.getMessage());
+                }
             }
         }
-        return platformSet;
+        return tokenViewSet;
     }
 
     public Result getUserList() {
@@ -87,10 +103,15 @@ public class UserAdminService {
         for(User user : userList){
             UserWithTokenStatus userWithTokenStatus = new UserWithTokenStatus();
             ClassUtil.covertFatherToChild(user,userWithTokenStatus);
-            userWithTokenStatus.setAvailableTokens(findTokenInRedis(user.getId()));
+            userWithTokenStatus.setAvailableTokens(getTokenViews(user.getId().toString() + "_*"));
             userWithTokenStatus.setPassword("");
             userTokenList.add(userWithTokenStatus);
         }
         return Result.successResult(userTokenList);
+    }
+
+    public Result deleteUserToken(Long userId, Integer platformId){
+
+        return Result.successResult(MessageEnum.SUCCESS.getMsg());
     }
 }

@@ -1,6 +1,7 @@
 package zhuojun.cruddemo.crud.common.domain;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 import zhuojun.cruddemo.crud.common.constant.Constants;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @date 2020-05-28 20:50
  **/
 @Data
+@Accessors(chain = true)
 public class Result<T> implements Serializable {
     /**
      * For RPC use

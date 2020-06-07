@@ -5,9 +5,8 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-import zhuojun.cruddemo.crud.auth.domain.po.AuthToken;
+import zhuojun.cruddemo.crud.common.domain.TokenView;
 import zhuojun.cruddemo.crud.auth.mapper.AuthTokenMapper;
-import zhuojun.cruddemo.crud.common.util.RedisUtil;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -31,14 +30,5 @@ public class MapperTest {
 
     @Test
     public void insert() {
-        AuthToken token = new AuthToken();
-        token.setToken("Test")
-                .setExpireTime(LocalDateTime.now())
-                .setUserId(1L);
-        Integer result = authTokenMapper.insert(token);
-        authTokenMapper.insert(token);
-        System.out.println(result);
-        System.out.println(authTokenMapper.selectById(1L));
-
     }
 }

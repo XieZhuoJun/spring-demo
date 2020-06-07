@@ -20,4 +20,5 @@ public class Constants {
 
     public static final String ROLE_CLAIM_KEY = "role";
     public static final String PLATFORM_CLAIM_KEY = "platform";
+    public static final String UUID_CLAIM_KEY = "uuid";
 }
