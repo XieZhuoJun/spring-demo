@@ -3,6 +3,8 @@ package zhuojun.cruddemo.crud.common.domain;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+
 /**
  * @author: zhuojun
  * @description:
@@ -11,7 +13,8 @@ import lombok.experimental.Accessors;
  */
 @Accessors(chain = true)
 @Data
-public class JwtParam {
+public class JwtParam implements Serializable {
+    private static final long serialVersionUID = 3866119660636504434L;
     private Long id;
     private String secret;
     private Integer roleId;

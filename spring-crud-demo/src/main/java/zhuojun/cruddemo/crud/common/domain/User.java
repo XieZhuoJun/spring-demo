@@ -23,8 +23,8 @@ import java.time.LocalDateTime;
 @TableName(value = "user")
 public class User extends Model<User> {
 
-    private static final long serialVersionUID = 1L;
 
+    private static final long serialVersionUID = -8391370345088427310L;
     /**
      * Primary key
      */

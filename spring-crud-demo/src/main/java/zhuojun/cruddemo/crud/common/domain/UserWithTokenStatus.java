@@ -16,6 +16,6 @@ import java.util.Set;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 public class UserWithTokenStatus extends User{
-    private Set<TokenView> availableTokens;
-
+    private static final long serialVersionUID = -727498239696735477L;
+    private Set<TokenView> activeTokens;
 }
