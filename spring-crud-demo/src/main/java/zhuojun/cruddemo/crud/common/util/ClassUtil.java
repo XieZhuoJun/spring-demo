@@ -21,7 +21,6 @@ public class ClassUtil {
                     Method getMethod = source.getClass().getMethod("get" + fname, null);
                     Method setMethod = target.getClass().getMethod("set" + fname, field.getType());
                     setMethod.invoke(target, getMethod.invoke(source, null));
-                    System.out.println(getMethod.invoke(source, null));
                 } catch (Exception e) {
                     continue;
                 }

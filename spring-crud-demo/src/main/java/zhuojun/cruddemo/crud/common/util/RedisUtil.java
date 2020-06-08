@@ -85,7 +85,7 @@ public class RedisUtil {
                     return redisTemplate.delete(list);
                 }
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.error(e.getMessage());
                 throw new RedisException(e);
             }
         }
@@ -126,7 +126,7 @@ public class RedisUtil {
                 return set(key, value);
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            System.out.println(e.getStackTrace());
             return Boolean.FALSE;
         }
     }
@@ -135,7 +135,7 @@ public class RedisUtil {
         try {
             return redisTemplate.keys(pattern);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            System.out.println(e.getStackTrace());
             return null;
         }
     }

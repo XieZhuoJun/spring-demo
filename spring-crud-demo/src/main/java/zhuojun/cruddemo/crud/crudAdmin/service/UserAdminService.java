@@ -1,4 +1,4 @@
-package zhuojun.cruddemo.crud.crudAdmin.service;
+package zhuojun.cruddemo.crud.crudadmin.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -8,17 +8,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import zhuojun.cruddemo.crud.auth.mapper.UserMapper;
 import zhuojun.cruddemo.crud.common.constant.Constants;
-import zhuojun.cruddemo.crud.common.domain.Result;
-import zhuojun.cruddemo.crud.common.domain.TokenView;
-import zhuojun.cruddemo.crud.common.domain.UserWithTokenStatus;
+import zhuojun.cruddemo.crud.common.domain.*;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.enums.RoleEnum;
 import zhuojun.cruddemo.crud.common.exception.AuthenticationException;
+import zhuojun.cruddemo.crud.common.exception.InternalException;
 import zhuojun.cruddemo.crud.common.exception.RegisterException;
 import zhuojun.cruddemo.crud.common.util.ClassUtil;
 import zhuojun.cruddemo.crud.common.util.RedisUtil;
-import zhuojun.cruddemo.crud.crudAdmin.domain.dto.RegisterForm;
-import zhuojun.cruddemo.crud.common.domain.User;
+import zhuojun.cruddemo.crud.crudadmin.domain.dto.RegisterForm;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -40,6 +38,10 @@ public class UserAdminService {
     @Resource
     private RedisUtil redisUtil;
 
+    /**
+     * @param registerForm
+     * @return
+     */
     public Result register(RegisterForm registerForm) {
         User newUser = new User();
         newUser.setEmail(registerForm.getEmail())
@@ -73,15 +75,19 @@ public class UserAdminService {
         }
     }
 
+    /**
+     * @param pattern
+     * @return
+     */
     private Set<TokenView> getTokenViews(String pattern) {
         Set<String> keySet = redisUtil.keys(pattern);
         Set<TokenView> tokenViewSet = new HashSet<>();
-        if(keySet != null){
-            for(String key : keySet){
-                try{
+        if (keySet != null) {
+            for (String key : keySet) {
+                try {
                     TokenView tokenView = new TokenView();
-                    String token = (String)redisUtil.get(key);
-                    DecodedJWT jwt = JWT.decode(token);
+                    RedisTokenValue tokenValue = (RedisTokenValue) redisUtil.get(key);
+                    DecodedJWT jwt = JWT.decode(tokenValue.getToken());
                     tokenView.setUuid(jwt.getClaim(Constants.UUID_CLAIM_KEY).asString())
                             .setRoleId(jwt.getClaim(Constants.ROLE_CLAIM_KEY).asInt())
                             .setUserId(Long.valueOf(jwt.getAudience().get(0)))
@@ -96,22 +102,36 @@ public class UserAdminService {
         return tokenViewSet;
     }
 
+    /**
+     * @return user list
+     */
     public Result getUserList() {
         QueryWrapper<User> queryWrapper = new QueryWrapper<User>();
         List<User> userList = userMapper.selectList(queryWrapper);
         List<UserWithTokenStatus> userTokenList = new ArrayList<UserWithTokenStatus>();
-        for(User user : userList){
+        for (User user : userList) {
             UserWithTokenStatus userWithTokenStatus = new UserWithTokenStatus();
-            ClassUtil.covertFatherToChild(user,userWithTokenStatus);
-            userWithTokenStatus.setAvailableTokens(getTokenViews(user.getId().toString() + "_*"));
+            ClassUtil.covertFatherToChild(user, userWithTokenStatus);
+            userWithTokenStatus.setActiveTokens(getTokenViews(user.getId().toString() + "_*"));
             userWithTokenStatus.setPassword("");
             userTokenList.add(userWithTokenStatus);
         }
         return Result.successResult(userTokenList);
     }
 
-    public Result deleteUserToken(Long userId, Integer platformId){
-
-        return Result.successResult(MessageEnum.SUCCESS.getMsg());
+    /**
+     * @param uuid
+     * @return
+     */
+    public Result deleteUserToken(String uuid) {
+        try {
+            Set<String> keySet = redisUtil.keys("*_" + uuid);
+            for (String key : keySet) {
+                redisUtil.del(key);
+            }
+            return Result.successResult(MessageEnum.SUCCESS.getMsg());
+        } catch (Exception e) {
+            throw new InternalException(MessageEnum.ERROR.getMsg());
+        }
     }
 }

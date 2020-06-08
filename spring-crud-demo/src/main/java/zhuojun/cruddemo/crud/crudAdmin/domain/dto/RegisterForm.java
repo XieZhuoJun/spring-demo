@@ -1,4 +1,4 @@
-package zhuojun.cruddemo.crud.crudAdmin.domain.dto;
+package zhuojun.cruddemo.crud.crudadmin.domain.dto;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package zhuojun.cruddemo.crud.crudAdmin.controller;
+package zhuojun.cruddemo.crud.crudadmin.controller;
 
 import org.springframework.web.bind.annotation.*;
 import zhuojun.cruddemo.crud.common.annotation.AuthRequired;
@@ -6,12 +6,12 @@ import zhuojun.cruddemo.crud.common.domain.Result;
 import zhuojun.cruddemo.crud.common.enums.MessageEnum;
 import zhuojun.cruddemo.crud.common.enums.RoleEnum;
 import zhuojun.cruddemo.crud.common.exception.AuthenticationException;
+import zhuojun.cruddemo.crud.common.exception.NormalException;
 import zhuojun.cruddemo.crud.common.util.FormatValidate;
-import zhuojun.cruddemo.crud.crudAdmin.domain.dto.RegisterForm;
-import zhuojun.cruddemo.crud.crudAdmin.service.UserAdminService;
+import zhuojun.cruddemo.crud.crudadmin.domain.dto.RegisterForm;
+import zhuojun.cruddemo.crud.crudadmin.service.UserAdminService;
 
 import javax.annotation.Resource;
-import javax.websocket.server.PathParam;
 
 /**
  * @author: zhuojun
@@ -25,6 +25,11 @@ public class UserAdminController {
     @Resource
     UserAdminService userAdminService;
 
+    /**
+     *
+     * @param registrationForm
+     * @return
+     */
     @PostMapping("/register")
     public Result userRegister(@RequestBody RegisterForm registrationForm) {
         /*
@@ -56,9 +61,17 @@ public class UserAdminController {
     }
 
 
+    /**
+     * @TODO 验证uuid格式，防止正则表达式注入
+     * @param uuid
+     * @return
+     */
     @AuthRequired(role = RoleEnum.ADMIN)
-    @DeleteMapping("/token/{userId}/{platformId}")
-    public Result deleteToken(@PathVariable("userId") Long userId,@PathVariable("platformId") Integer platformId){
-        return userAdminService.deleteUserToken(userId, platformId);
+    @DeleteMapping("/token/{uuid}")
+    public Result deleteToken(@PathVariable("uuid") String uuid){
+        if(!FormatValidate.verifyUUID(uuid)){
+            throw new NormalException(MessageEnum.IVALID_PARAM.getMsg());
+        }
+        return userAdminService.deleteUserToken(uuid);
     }
 }
