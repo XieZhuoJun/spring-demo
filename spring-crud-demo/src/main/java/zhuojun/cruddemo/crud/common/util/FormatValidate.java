@@ -24,4 +24,13 @@ public class FormatValidate {
         else{
         return true;}
     }
+
+    /**
+     * @TODO complete
+     * @param uuid
+     * @return
+     */
+    public static Boolean verifyUUID(String uuid){
+        return false;
+    }
 }

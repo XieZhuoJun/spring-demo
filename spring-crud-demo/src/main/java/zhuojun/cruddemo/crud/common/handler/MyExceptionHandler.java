@@ -24,21 +24,18 @@ public class MyExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public Result<Object> exceptionHandler(Exception e){
-        log.error(ERROR,e);
         return Result.failureResult(e.getMessage());
     }
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseBody
     public Result<Object> authenticationExceptionHandler(AuthenticationException e){
-        log.warn(e.getMessage());
         return Result.failureResult(e.getMessage());
     }
 
     @ExceptionHandler(RegisterException.class)
     @ResponseBody
     public Result<Object> registerExceptionHandler(RegisterException e){
-        log.warn(e.getMessage());
         return Result.failureResult(e.getMessage());
     }
 }

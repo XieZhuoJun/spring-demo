@@ -23,6 +23,10 @@ public class AuthUserController {
     @Resource
     AuthenticationService authenticationService;
 
+    /**
+     * @param logForm
+     * @return
+     */
     @PostMapping("/login")
     public Result userLogin(@RequestBody LogForm logForm) {
         /*
@@ -39,9 +43,13 @@ public class AuthUserController {
         if (!valid) {
             throw new AuthenticationException(MessageEnum.IVALID_PARAM);
         }
-        return authenticationService.authLogInfo(logForm);
+        return authenticationService.verifyLogInfo(logForm);
     }
 
+    /**
+     * @param token
+     * @return
+     */
     @AuthRequired(role = RoleEnum.USER)
     @GetMapping("/refreshToken")
     public Result refreshToken(@RequestHeader(Constants.AUTH_HEADER_KEY) String token){
