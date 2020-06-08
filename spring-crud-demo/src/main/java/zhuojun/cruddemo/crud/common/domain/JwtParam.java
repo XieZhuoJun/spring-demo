@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 @Accessors(chain = true)
 @Data
-public class JwtParam implements Serializable {
+public class JwtParam {
     private static final long serialVersionUID = 3866119660636504434L;
     private Long id;
     private String secret;

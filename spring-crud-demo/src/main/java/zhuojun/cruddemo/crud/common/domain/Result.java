@@ -12,17 +12,18 @@ import java.io.Serializable;
  **/
 @Data
 @Accessors(chain = true)
-public class Result<T> implements Serializable {
+public class Result<T> {
+
     /**
      * For RPC use
      */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3513870689110809364L;
 
     private Integer code;
     private String message;
     private T data;
 
-    public static <T> Result<T> successResult(){
+    public static <T> Result<T> successResult() {
         Result<T> result = new Result<T>();
         result.code = Constants.SUCCESS;
         return result;
@@ -35,14 +36,14 @@ public class Result<T> implements Serializable {
         return result;
     }
 
-    public static <T> Result<T> successResult(String message){
+    public static <T> Result<T> successResult(String message) {
         Result<T> result = new Result<T>();
         result.code = Constants.SUCCESS;
         result.message = message;
         return result;
     }
 
-    public static <T> Result<T> successResult(String message, T data){
+    public static <T> Result<T> successResult(String message, T data) {
         Result<T> result = new Result<T>();
         result.code = Constants.SUCCESS;
         result.message = message;
@@ -50,7 +51,7 @@ public class Result<T> implements Serializable {
         return result;
     }
 
-    public static <T> Result<T> failureResult(){
+    public static <T> Result<T> failureResult() {
         Result<T> result = new Result<T>();
         result.code = Constants.FAILURE;
         return result;
@@ -63,14 +64,14 @@ public class Result<T> implements Serializable {
         return result;
     }
 
-    public static <T> Result<T> failureResult(String message){
+    public static <T> Result<T> failureResult(String message) {
         Result<T> result = new Result<T>();
         result.code = Constants.FAILURE;
         result.message = message;
         return result;
     }
 
-    public static <T> Result<T> failureResult(String message, T data){
+    public static <T> Result<T> failureResult(String message, T data) {
         Result<T> result = new Result<T>();
         result.code = Constants.FAILURE;
         result.message = message;

@@ -1,5 +1,7 @@
 package zhuojun.cruddemo.crud.auth.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -7,6 +9,7 @@ import zhuojun.cruddemo.crud.auth.domain.dto.LogForm;
 import zhuojun.cruddemo.crud.common.constant.Constants;
 import zhuojun.cruddemo.crud.common.constant.PlatformConstants;
 import zhuojun.cruddemo.crud.common.domain.JwtParam;
+import zhuojun.cruddemo.crud.common.domain.RedisTokenValue;
 import zhuojun.cruddemo.crud.common.util.JwtUtil;
 import zhuojun.cruddemo.crud.common.domain.User;
 import zhuojun.cruddemo.crud.auth.mapper.UserMapper;
@@ -31,15 +34,15 @@ public class AuthenticationService {
     @Resource
     private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private RedisUtil redisutil;
 
     /**
      * @param logForm 登录表单
      * @return 带有token的Result
-     * @description Verify user loginfo and response with token
+     * @description Verify user login info and response with token
      */
-    public Result authLogInfo(LogForm logForm) {
+    public Result verifyLogInfo(LogForm logForm) {
         /*
          Format Validating should be done at controller
          */
@@ -70,15 +73,23 @@ public class AuthenticationService {
         Generate token and add to redis
          */
         Map<String, String> tokenMap = generateTokenMap(user);
-        if(!addTokenToRedis(tokenMap.get(Constants.AUTH_HEADER_KEY), user.getId(),PlatformConstants.DESKTOP_BROWSER,user.getPassword())){
+        DecodedJWT jwt = JWT.decode(tokenMap.get(Constants.AUTH_HEADER_KEY));
+        String token = tokenMap.get(Constants.AUTH_HEADER_KEY);
+        String secret = user.getPassword();
+        Long userId = user.getId();
+        Integer platformId = jwt.getClaim(Constants.PLATFORM_CLAIM_KEY).asInt();
+        String uuid = jwt.getClaim(Constants.UUID_CLAIM_KEY).asString();
+
+        if(!addTokenToRedis(token,secret,userId,platformId,uuid)){
             throw new AuthenticationException(MessageEnum.ERROR);
         }
         return Result.successResult(MessageEnum.LOGIN_SUCCESS.getMsg(), tokenMap);
     }
 
-    /**@TODO
+    /**
      * @param token 旧的token
      * @return 包含新token的result
+     * @TODO complete
      */
     public Result refreshToken(String token) {
         return new Result();
@@ -97,8 +108,11 @@ public class AuthenticationService {
         return tokenMap;
     }
 
-    private Boolean addTokenToRedis(String token,Long userId, Integer platform, String secret){
-        String key = userId.toString() + "_" + platform.toString() + "_" + token;
-        return redisutil.set(key,secret,Constants.EXPIRE_TIME / 1000);
+    private Boolean addTokenToRedis(String token, String secret, Long userId, Integer platformId, String uuid) {
+        String key = userId.toString() + "_" + platformId.toString() + "_" + uuid;
+        RedisTokenValue redisTokenValue = new RedisTokenValue();
+        redisTokenValue.setToken(token)
+                .setSecret(secret);
+        return redisutil.set(key, redisTokenValue, Constants.EXPIRE_TIME / 1000);
     }
 }

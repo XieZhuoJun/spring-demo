@@ -12,7 +12,6 @@ public class RedisException extends BaseServerException {
 
     public RedisException() {
     }
-
     public RedisException(MessageEnum messageEnum) {
         super(messageEnum.getMsg());
     }

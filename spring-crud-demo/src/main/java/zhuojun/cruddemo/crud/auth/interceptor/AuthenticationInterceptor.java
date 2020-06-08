@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import zhuojun.cruddemo.crud.common.constant.PlatformConstants;
+import zhuojun.cruddemo.crud.common.domain.RedisTokenValue;
 import zhuojun.cruddemo.crud.common.domain.User;
 import zhuojun.cruddemo.crud.auth.mapper.AuthTokenMapper;
 import zhuojun.cruddemo.crud.auth.mapper.UserMapper;
@@ -42,10 +43,6 @@ import java.util.Map;
 @Configuration
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
-//    @Resource
-//    private UserMapper userMapper;
-//用户信息从redis和token中取得
-
     @Resource
     private RedisUtil redisUtil;
 
@@ -66,35 +63,36 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         try {
             jwt = JWT.decode(token);
         } catch (JWTDecodeException e) {
-            //Invalid token
+            //Invalid token, might have been edited
             throw new AuthenticationException(MessageEnum.INVALID_TOKEN);
         }
 
         /*
-         * 提前检查是否过期，减少数据库操作
+         * 提前检查是否过期，减少Redis操作
          */
         LocalDateTime expireDate = LocalDateTime.ofInstant(jwt.getExpiresAt().toInstant(), ZoneId.systemDefault());
         if (expireDate.isBefore(LocalDateTime.now())) {
-            throw new AuthenticationException(MessageEnum.TOKEN_EXPIRED);
+            throw new AuthenticationException(MessageEnum.TOKEN_EXPIRED.getMsg());
         }
 
         /*
          * 在Redis白名单中查找token
+         * key格式为：用户id + 平台id + token uuid
          */
-        String key = jwt.getAudience().get(0) + "_" + PlatformConstants.DESKTOP_BROWSER + "_" + token;
-        String secret = (String)redisUtil.get(key);
-        if (secret == null) {
-            throw new AuthenticationException(MessageEnum.INVALID_TOKEN);
+        String key = jwt.getAudience().get(0) + "_" + PlatformConstants.DESKTOP_BROWSER + "_" + jwt.getClaim(Constants.UUID_CLAIM_KEY).asString();
+        RedisTokenValue tokenValue = (RedisTokenValue)redisUtil.get(key);
+        if (tokenValue == null || tokenValue.getSecret() == null || !tokenValue.getToken().equals(token)) {
+            throw new AuthenticationException(MessageEnum.INVALID_TOKEN.getMsg());
         }
 
         /*
          Token验证
          */
-        JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(secret)).build();
+        JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(tokenValue.getSecret())).build();
         try {
             jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
-            throw new AuthenticationException(MessageEnum.INVALID_TOKEN);
+            throw new AuthenticationException(MessageEnum.INVALID_TOKEN.getMsg());
         }
         User user = new User();
         user.setId(Long.valueOf(jwt.getAudience().get(0)))
@@ -120,8 +118,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if (!method.isAnnotationPresent(AuthRequired.class)) {
             return true;
         }
-
-        log.debug(method.getName());
         /*
          * 获取权限要求
          */
@@ -134,7 +130,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             RoleEnum role = authRequired.role();
 
             /*
-             * 游客不需要权限，Token为空也可访问
+             * 要求角色为游客的接口不需要权限，不用验证token
              */
             if (role == RoleEnum.VISITOR) {
                 return true;
