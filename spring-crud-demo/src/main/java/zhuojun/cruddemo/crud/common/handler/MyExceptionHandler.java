@@ -24,7 +24,7 @@ public class MyExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public Result<Object> exceptionHandler(Exception e){
-        return Result.failureResult(e.getMessage());
+        return Result.failureResult(e.getStackTrace());
     }
 
     @ExceptionHandler(AuthenticationException.class)

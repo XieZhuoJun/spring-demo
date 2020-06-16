@@ -47,6 +47,7 @@ public class AuthUserController {
     }
 
     /**
+     * @TODO test
      * @param token
      * @return
      */

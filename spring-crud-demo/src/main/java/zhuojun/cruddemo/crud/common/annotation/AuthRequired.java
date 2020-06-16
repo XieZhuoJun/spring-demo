@@ -22,5 +22,4 @@ public @interface AuthRequired {
      * @return
      */
     RoleEnum role() default RoleEnum.ADMIN;
-
 }

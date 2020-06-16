@@ -1,12 +1,19 @@
 package zhuojun.cruddemo.crud.common.util;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import zhuojun.cruddemo.crud.common.constant.Constants;
 import zhuojun.cruddemo.crud.common.domain.JwtParam;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
+
+import static com.sun.javaws.JnlpxArgs.verify;
 
 /**
  * @author: zhuojun
@@ -36,6 +43,26 @@ public class JwtUtil<T> {
 
     public static String generateJwt(JwtParam jwtparam) {
         return generateJwt(jwtparam.getId().toString(), jwtparam.getSecret(), jwtparam.getRoleId(),jwtparam.getPlatform(), jwtparam.getExpireTime());
+    }
+
+    /**
+     *
+     * @param token
+     * @param secret
+     * @param ttlMillis
+     * @return
+     */
+    public static String refreshToken(String token, String secret, long ttlMillis){
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        DecodedJWT decodedJwt = verifier.verify(token);
+        JWTCreator.Builder builder = JWT.create()
+                .withAudience(decodedJwt.getAudience().get(0))
+                .withExpiresAt(new Date(System.currentTimeMillis() + ttlMillis));
+        for(String key:decodedJwt.getClaims().keySet()){
+            builder.withClaim(key, decodedJwt.getClaims().get(key).asString());
+        }
+        return builder.sign(algorithm);
     }
 
     public static String getJwtUserId(String token) {

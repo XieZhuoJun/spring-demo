@@ -35,7 +35,7 @@ public class AuthenticationService {
     private UserMapper userMapper;
 
     @Resource
-    private RedisUtil redisutil;
+    private RedisUtil redisUtil;
 
     /**
      * @param logForm 登录表单
@@ -89,10 +89,19 @@ public class AuthenticationService {
     /**
      * @param token 旧的token
      * @return 包含新token的result
-     * @TODO complete
+     * @TODO test
      */
     public Result refreshToken(String token) {
-        return new Result();
+        DecodedJWT jwt = JWT.decode(token);
+        String key = jwt.getAudience().get(0) + "_" + jwt.getClaim(Constants.PLATFORM_CLAIM_KEY) + "_" + jwt.getClaim(Constants.UUID_CLAIM_KEY);
+        RedisTokenValue tokenValue = (RedisTokenValue)redisUtil.get(key);
+        if (tokenValue == null || tokenValue.getSecret() == null || !tokenValue.getToken().equals(token)) {
+            throw new AuthenticationException(MessageEnum.INVALID_TOKEN.getMsg());
+        }
+        String newToken = JwtUtil.refreshToken(token,tokenValue.getSecret(),Constants.EXPIRE_TIME);
+        Map<String, String> tokenMap = new HashMap<>(0);
+        tokenMap.put(Constants.AUTH_HEADER_KEY, newToken);
+        return Result.successResult(MessageEnum.LOGIN_SUCCESS.getMsg(), tokenMap);
     }
 
     private Map<String, String> generateTokenMap(User user) {
@@ -113,6 +122,6 @@ public class AuthenticationService {
         RedisTokenValue redisTokenValue = new RedisTokenValue();
         redisTokenValue.setToken(token)
                 .setSecret(secret);
-        return redisutil.set(key, redisTokenValue, Constants.EXPIRE_TIME / 1000);
+        return redisUtil.set(key, redisTokenValue, Constants.EXPIRE_TIME / 1000);
     }
 }

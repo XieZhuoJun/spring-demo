@@ -1,5 +1,6 @@
 package zhuojun.cruddemo.crud.crudadmin.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import zhuojun.cruddemo.crud.common.annotation.AuthRequired;
 import zhuojun.cruddemo.crud.common.domain.Result;
@@ -13,6 +14,7 @@ import zhuojun.cruddemo.crud.crudadmin.service.UserAdminService;
 
 import javax.annotation.Resource;
 
+
 /**
  * @author: zhuojun
  * @description:
@@ -24,7 +26,6 @@ import javax.annotation.Resource;
 public class UserAdminController {
     @Resource
     UserAdminService userAdminService;
-
     /**
      *
      * @param registrationForm
