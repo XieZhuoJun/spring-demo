@@ -79,7 +79,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
          * 在Redis白名单中查找token
          * key格式为：用户id + 平台id + token uuid
          */
-        String key = jwt.getAudience().get(0) + "_" + jwt.getClaim(Constants.PLATFORM_CLAIM_KEY) + "_" + jwt.getClaim(Constants.UUID_CLAIM_KEY);
+        String key = jwt.getAudience().get(0) + "_" + jwt.getClaim(Constants.PLATFORM_CLAIM_KEY).asInt() + "_" + jwt.getClaim(Constants.UUID_CLAIM_KEY).asString();
         RedisTokenValue tokenValue = (RedisTokenValue)redisUtil.get(key);
         if (tokenValue == null || tokenValue.getSecret() == null || !tokenValue.getToken().equals(token)) {
             throw new AuthenticationException(MessageEnum.INVALID_TOKEN.getMsg());
