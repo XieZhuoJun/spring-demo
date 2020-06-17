@@ -95,6 +95,7 @@ public class UserAdminService {
                             .setPlatformId(jwt.getClaim(Constants.PLATFORM_CLAIM_KEY).asInt());
                     tokenViewSet.add(tokenView);
                 } catch (Exception e) {
+                    //TODO:This is to deal with unrepeatable read problem, maybe we could use redis transaction to avoid it
                     log.info(e.getMessage());
                 }
             }

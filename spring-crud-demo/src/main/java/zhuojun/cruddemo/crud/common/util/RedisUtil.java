@@ -32,12 +32,7 @@ public class RedisUtil {
      * @return
      */
     public Boolean expire(String key, long time) {
-        try {
-            return redisTemplate.expire(key, time, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return Boolean.FALSE;
-        }
+        return redisTemplate.expire(key, time, TimeUnit.SECONDS);
     }
 
     /**
@@ -45,12 +40,7 @@ public class RedisUtil {
      * @return
      */
     public Long getExpire(String key) {
-        try {
-            return redisTemplate.getExpire(key, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new RedisException(e);
-        }
+        return redisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
 
     /**
@@ -58,12 +48,7 @@ public class RedisUtil {
      * @return
      */
     public Boolean hasKey(String key) {
-        try {
-            return redisTemplate.hasKey(key);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new RedisException(e);
-        }
+        return redisTemplate.hasKey(key);
     }
 
     /**
@@ -72,21 +57,16 @@ public class RedisUtil {
      */
     public Long del(String... key) {
         if (key != null && key.length > 0) {
-            try {
-                if (key.length == 1) {
-                    Boolean code = redisTemplate.delete(key[0]);
-                    if (code != null && code.equals(Boolean.TRUE)) {
-                        return 1L;
-                    } else {
-                        return 0L;
-                    }
+            if (key.length == 1) {
+                Boolean code = redisTemplate.delete(key[0]);
+                if (code != null && code.equals(Boolean.TRUE)) {
+                    return 1L;
                 } else {
-                    List<String> list = new ArrayList<String>(Arrays.asList(key));
-                    return redisTemplate.delete(list);
+                    return 0L;
                 }
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                throw new RedisException(e);
+            } else {
+                List<String> list = new ArrayList<String>(Arrays.asList(key));
+                return redisTemplate.delete(list);
             }
         }
         return 0L;
@@ -102,13 +82,8 @@ public class RedisUtil {
      * @return
      */
     public Boolean set(String key, Object value) {
-        try {
-            redisTemplate.opsForValue().set(key, value);
-            return true;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return Boolean.FALSE;
-        }
+        redisTemplate.opsForValue().set(key, value);
+        return true;
     }
 
     /**
@@ -118,25 +93,15 @@ public class RedisUtil {
      * @return
      */
     public Boolean set(String key, Object value, Long time) {
-        try {
-            if (time > 0) {
-                redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
-                return true;
-            } else {
-                return set(key, value);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getStackTrace());
-            return Boolean.FALSE;
+        if (time > 0) {
+            redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
+            return true;
+        } else {
+            return set(key, value);
         }
     }
 
     public Set<String> keys(String pattern) {
-        try {
-            return redisTemplate.keys(pattern);
-        } catch (Exception e) {
-            System.out.println(e.getStackTrace());
-            return null;
-        }
+        return redisTemplate.keys(pattern);
     }
 }
