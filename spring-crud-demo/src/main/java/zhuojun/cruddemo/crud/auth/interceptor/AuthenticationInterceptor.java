@@ -80,7 +80,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
          * key格式为：用户id + 平台id + token uuid
          */
         String key = jwt.getAudience().get(0) + "_" + jwt.getClaim(Constants.PLATFORM_CLAIM_KEY).asInt() + "_" + jwt.getClaim(Constants.UUID_CLAIM_KEY).asString();
-        RedisTokenValue tokenValue = (RedisTokenValue)redisUtil.get(key);
+        RedisTokenValue tokenValue = (RedisTokenValue) redisUtil.get(key);
         if (tokenValue == null || tokenValue.getSecret() == null || !tokenValue.getToken().equals(token)) {
             throw new AuthenticationException(MessageEnum.INVALID_TOKEN.getMsg());
         }
@@ -140,11 +140,13 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             /*
              * 用户角色验证
              */
-            if (role == RoleEnum.ADMIN && !RoleEnum.ADMIN.getRoleId().equals(user.getRoleId())) {
-                throw new AuthenticationException(MessageEnum.NO_AUTH);
-            }
-
-            if (role == RoleEnum.USER && !(RoleEnum.USER.getRoleId().equals(user.getRoleId()))) {
+            if (RoleEnum.ADMIN.getRoleId().equals(user.getRoleId())) {
+                //ADMIN拥有所有接口的权限
+                return true;
+            } else if (role == RoleEnum.USER && (RoleEnum.USER.getRoleId().equals(user.getRoleId()))) {
+                //USER权限验证
+                return true;
+            } else {
                 throw new AuthenticationException(MessageEnum.NO_AUTH);
             }
         }

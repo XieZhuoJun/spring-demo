@@ -89,11 +89,10 @@ public class AuthenticationService {
     /**
      * @param token 旧的token
      * @return 包含新token的result
-     * @TODO test
      */
     public Result refreshToken(String token) {
         DecodedJWT jwt = JWT.decode(token);
-        String key = jwt.getAudience().get(0) + "_" + jwt.getClaim(Constants.PLATFORM_CLAIM_KEY) + "_" + jwt.getClaim(Constants.UUID_CLAIM_KEY);
+        String key = jwt.getAudience().get(0) + "_" + jwt.getClaim(Constants.PLATFORM_CLAIM_KEY).asInt() + "_" + jwt.getClaim(Constants.UUID_CLAIM_KEY).asString();
         RedisTokenValue tokenValue = (RedisTokenValue)redisUtil.get(key);
         if (tokenValue == null || tokenValue.getSecret() == null || !tokenValue.getToken().equals(token)) {
             throw new AuthenticationException(MessageEnum.INVALID_TOKEN.getMsg());
