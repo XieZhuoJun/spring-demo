@@ -26,11 +26,18 @@ public class FormatValidate {
     }
 
     /**
-     * @TODO complete
+     * @TODO Test
      * @param uuid
      * @return
      */
     public static Boolean verifyUUID(String uuid){
-        return false;
+        //Only Numbers, alphabetic characters and '-' are allowed
+        //No restrictions for length
+        for(Char c : uuid.toCharArray()){
+            if(!((c >= 0 && c <= 9) || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))){
+                return false;
+            }
+        }        
+        return true;
     }
 }
